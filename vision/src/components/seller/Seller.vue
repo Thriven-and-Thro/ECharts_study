@@ -25,14 +25,75 @@ export default {
   mounted() {
     this.initChart();
     this.getData();
+    // 监听屏幕变化
+    window.addEventListener("resize", this.screenAdapter);
+    this.screenAdapter();
   },
   destroyed() {
     clearInterval(this.timer);
+    // 注销事件
+    window.removeEventListener("resize", this.screenAdapter);
   },
   methods: {
     // 初始化
     initChart() {
       this.chartInstance = this.$echarts.init(this.$refs.seller, "chalk");
+      const initOption = {
+        title: {
+          text: "▎商家销售统计",
+          left: 20,
+          top: 20,
+        },
+        grid: {
+          top: "20%",
+          left: "3%",
+          right: "6%",
+          bottom: "3%",
+          // 是位置设置包含文字
+          containLabel: true,
+        },
+        xAxis: {
+          type: "value",
+        },
+        yAxis: {
+          type: "category",
+        },
+        tooltip: {
+          trigger: "axis",
+          axisPointer: {
+            type: "line",
+            z: 0,
+            lineStyle: {
+              color: "#2d3443",
+            },
+          },
+        },
+        series: [
+          {
+            type: "bar",
+            label: {
+              show: true,
+              position: "right",
+              textStyle: {
+                color: "#fff",
+              },
+            },
+            itemStyle: {
+              color: new this.$echarts.graphic.LinearGradient(0, 0, 1, 0, [
+                {
+                  offset: 0,
+                  color: "#5052ee",
+                },
+                {
+                  offset: 1,
+                  color: "#ab6ee5",
+                },
+              ]),
+            },
+          },
+        ],
+      };
+      this.chartInstance.setOption(initOption);
     },
     // 获取数据
     async getData() {
@@ -75,71 +136,18 @@ export default {
         return item.value;
       });
       // 柱状图配置
-      const option = {
-        title: {
-          text: "▎商家销售统计",
-          textStyle: {
-            fontSize: 66,
-          },
-          left: 20,
-          top: 20,
-        },
-        grid: {
-          top: "20%",
-          left: "3%",
-          right: "6%",
-          bottom: "3%",
-          // 是位置设置包含文字
-          containLabel: true,
-        },
-        xAxis: {
-          type: "value",
-        },
+      const dataOption = {
         yAxis: {
-          type: "category",
           data: sellerNames,
-        },
-        tooltip: {
-          trigger: "axis",
-          axisPointer: {
-            type: "line",
-            z: 0,
-            lineStyle: {
-              width: 66,
-              color: "#2d3443",
-            },
-          },
         },
         series: [
           {
-            type: "bar",
             data: sellerValues,
-            barWidth: 66,
-            label: {
-              show: true,
-              position: "right",
-              textStyle: {
-                color: "#fff",
-              },
-            },
-            itemStyle: {
-              barBorderRadius: [0, 33, 33, 0],
-              color: new this.$echarts.graphic.LinearGradient(0, 0, 1, 0, [
-                {
-                  offset: 0,
-                  color: "#5052ee",
-                },
-                {
-                  offset: 1,
-                  color: "#ab6ee5",
-                },
-              ]),
-            },
           },
         ],
       };
       // 使用
-      this.chartInstance.setOption(option);
+      this.chartInstance.setOption(dataOption);
     },
     startInterval() {
       if (this.timer) {
@@ -155,6 +163,48 @@ export default {
     },
     endInterval() {
       clearInterval(this.timer);
+    },
+    // 屏幕适配
+    screenAdapter() {
+      const titleFontSize = (this.$refs.seller.offsetWidth / 100) * 3.6;
+      const adapterOption = {
+        xAxis: {
+          axisLabel: {
+            fontSize: titleFontSize / 2,
+          },
+        },
+        yAxis: {
+          axisLabel: {
+            fontSize: titleFontSize / 2,
+          },
+        },
+        title: {
+          textStyle: {
+            fontSize: titleFontSize,
+          },
+        },
+        label: {
+          fontSize: titleFontSize / 2,
+        },
+        tooltip: {
+          axisPointer: {
+            lineStyle: {
+              width: titleFontSize,
+            },
+          },
+        },
+        series: [
+          {
+            barWidth: titleFontSize,
+            itemStyle: {
+              barBorderRadius: [0, titleFontSize / 2, titleFontSize / 2, 0],
+            },
+          },
+        ],
+      };
+      this.chartInstance.setOption(adapterOption);
+      // 要调用实例的resize方法
+      this.chartInstance.resize();
     },
   },
 };
