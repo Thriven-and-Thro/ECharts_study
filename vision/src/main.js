@@ -5,7 +5,6 @@ import store from './store'
 import axios from 'axios'
 
 import './assets/css/common.less'
-import '../public/font/iconfont.css'
 
 // 封装
 // 默认路径

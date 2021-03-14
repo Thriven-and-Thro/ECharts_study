@@ -3,13 +3,17 @@ import VueRouter from 'vue-router'
 
 const SellerPage = () => import('@/views/seller/SellerPage')
 const TrendPage = () => import('@/views/trend/TrendPage')
+const MapPage = () => import('@/views/map/MapPage')
+const RankPage = () => import('@/views/rank/RankPage')
+const HotPage = () => import('@/views/hot/HotPage')
+const StockPage = () => import('@/views/stock/StockPage')
 
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '',
-    redirect: '/trend'
+    redirect: '/stock'
   },
   {
     path: '/seller',
@@ -19,6 +23,22 @@ const routes = [
     path: '/trend',
     component: TrendPage
   },
+  {
+    path: '/map',
+    component: MapPage
+  },
+  {
+    path: '/rank',
+    component: RankPage
+  },
+  {
+    path: '/hot',
+    component: HotPage
+  },
+  {
+    path: '/stock',
+    component: StockPage
+  }
 
 ]
 
