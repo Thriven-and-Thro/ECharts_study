@@ -13,7 +13,7 @@
 import { initOption } from "@/components/seller/sellerOption";
 import { commonData } from "@/common/mixin";
 export default {
-  name: "Seller",
+  name: "SellerPage",
   mixins: [commonData],
   data() {
     return {
@@ -150,12 +150,4 @@ export default {
 </script>
 
 <style lang='less' scoped>
-.seller {
-  height: 100%;
-  width: 100%;
-  .seller_contain {
-    height: 100%;
-    width: 100%;
-  }
-}
 </style>

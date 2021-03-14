@@ -11,3 +11,15 @@ body,
 canvas {
   border-radius: 20px;
 }
+.seller,
+.trend {
+  height: 100%;
+  width: 100%;
+}
+.seller .seller_contain,
+.trend .seller_contain,
+.seller .trend_contain,
+.trend .trend_contain {
+  height: 100%;
+  width: 100%;
+}
