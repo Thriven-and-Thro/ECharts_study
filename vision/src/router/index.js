@@ -7,13 +7,18 @@ const MapPage = () => import('@/views/map/MapPage')
 const RankPage = () => import('@/views/rank/RankPage')
 const HotPage = () => import('@/views/hot/HotPage')
 const StockPage = () => import('@/views/stock/StockPage')
+const Screen = () => import('@/views/Screen')
 
 Vue.use(VueRouter)
 
 const routes = [
   {
     path: '',
-    redirect: '/stock'
+    redirect: '/screen'
+  },
+  {
+    path: '/screen',
+    component: Screen
   },
   {
     path: '/seller',

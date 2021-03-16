@@ -12,6 +12,7 @@
 <script>
 import { initOption, colorArr } from "@/components/rank/rankOption";
 import { commonData } from "@/common/mixin";
+import { mapState } from "vuex";
 export default {
   name: "RankPage",
   data() {
@@ -21,27 +22,52 @@ export default {
     };
   },
   mixins: [commonData],
+  created() {
+    // 注册回调函数
+    this.$socket.registerCallBack("rankData", this.getData);
+  },
   mounted() {
     this.initChart();
-    this.getData();
+    // this.getData();
+    this.$socket.send({
+      action: "getData",
+      socketType: "rankData",
+      chartName: "rank",
+      value: "",
+    });
     // 监听屏幕变化
     window.addEventListener("resize", this.screenAdapter);
     this.screenAdapter();
   },
+
   destroyed() {
     clearInterval(this.timer);
     // 注销事件
     window.removeEventListener("resize", this.screenAdapter);
+    // 销毁回调函数
+    this.$socket.unRegisterCallBack("rankData");
+  },
+  computed: {
+    ...mapState(["theme"]),
+  },
+  watch: {
+    theme() {
+      // 销毁图表
+      this.chartInstance.dispose();
+      this.initChart();
+      this.screenAdapter();
+      this.updateChart();
+    },
   },
   methods: {
     // 初始化
     initChart() {
-      this.chartInstance = this.$echarts.init(this.$refs.rank, "chalk");
+      this.chartInstance = this.$echarts.init(this.$refs.rank, this.theme);
       this.chartInstance.setOption(initOption);
     },
     // 获取数据
-    async getData() {
-      const { data: ret } = await this.$http.get("rank");
+    getData(ret) {
+      // const { data: ret } = await this.$http.get("rank");
       this.allData = ret;
       this.sortDate();
       this.updateChart();

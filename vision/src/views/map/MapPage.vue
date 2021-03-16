@@ -9,6 +9,7 @@ import axios from "axios";
 import { initOption } from "@/components/map/mapOption";
 import { commonData } from "@/common/mixin";
 import { getProvinceMapInfo } from "@/common/map_utils";
+import { mapState } from "vuex";
 export default {
   name: "MapPage",
   data() {
@@ -16,22 +17,47 @@ export default {
       mapData: {},
     };
   },
+  created() {
+    // 注册回调函数
+    this.$socket.registerCallBack("mapData", this.getData);
+  },
   mixins: [commonData],
   mounted() {
     this.initChart();
     // 监听屏幕变化
+    this.$socket.send({
+      action: "getData",
+      socketType: "mapData",
+      chartName: "map",
+      value: "",
+    });
     window.addEventListener("resize", this.screenAdapter);
     this.screenAdapter();
   },
+
   destroyed() {
     // 注销事件
     window.removeEventListener("resize", this.screenAdapter);
     this.chartInstance = null;
+    // 销毁回调函数
+    this.$socket.unRegisterCallBack("mapData");
+  },
+  computed: {
+    ...mapState(["theme"]),
+  },
+  watch: {
+    theme() {
+      // 销毁图表
+      this.chartInstance.dispose();
+      this.initChart();
+      this.screenAdapter();
+      this.updateChart();
+    },
   },
   methods: {
     // 初始化
     async initChart() {
-      this.chartInstance = this.$echarts.init(this.$refs.map, "chalk");
+      this.chartInstance = this.$echarts.init(this.$refs.map, this.theme);
 
       // 从本地获取
       const ret = await axios.get(
@@ -39,7 +65,7 @@ export default {
       );
       this.$echarts.registerMap("china", ret.data);
       this.chartInstance.setOption(initOption);
-      this.getData();
+      // this.getData();
 
       // 地图点击
       this.chartInstance.on("click", async (arg) => {
@@ -64,8 +90,8 @@ export default {
       });
     },
     // 获取数据
-    async getData() {
-      const { data: ret } = await this.$http.get("map");
+    getData(ret) {
+      // const { data: ret } = await this.$http.get("map");
       this.allData = ret;
       this.updateChart();
     },

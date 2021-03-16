@@ -13,3 +13,6 @@ app.use(koaResponseData)
 
 // listen 用来启动一个http服务器
 app.listen(8888)
+
+const webSocketService = require('./service/web_socket_service')
+webSocketService.listen()

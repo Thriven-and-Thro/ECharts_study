@@ -12,6 +12,7 @@
 <script>
 import { initOption } from "@/components/seller/sellerOption";
 import { commonData } from "@/common/mixin";
+import { mapState } from "vuex";
 export default {
   name: "SellerPage",
   mixins: [commonData],
@@ -22,27 +23,52 @@ export default {
       showData: null,
     };
   },
+  created() {
+    // 注册回调函数
+    this.$socket.registerCallBack("sellerData", this.getData);
+  },
   mounted() {
     this.initChart();
-    this.getData();
+    // this.getData();
+    this.$socket.send({
+      action: "getData",
+      socketType: "sellerData",
+      chartName: "seller",
+      value: "",
+    });
     // 监听屏幕变化
     window.addEventListener("resize", this.screenAdapter);
     this.screenAdapter();
   },
+
   destroyed() {
     clearInterval(this.timer);
     // 注销事件
     window.removeEventListener("resize", this.screenAdapter);
+    // 销毁回调函数
+    this.$socket.unRegisterCallBack("sellerData");
+  },
+  computed: {
+    ...mapState(["theme"]),
+  },
+  watch: {
+    theme() {
+      // 销毁图表
+      this.chartInstance.dispose();
+      this.initChart();
+      this.screenAdapter();
+      this.updateChart();
+    },
   },
   methods: {
     // 初始化
     initChart() {
-      this.chartInstance = this.$echarts.init(this.$refs.seller, "chalk");
+      this.chartInstance = this.$echarts.init(this.$refs.seller, this.theme);
       this.chartInstance.setOption(initOption);
     },
     // 获取数据
-    async getData() {
-      const { data: ret } = await this.$http.get("seller");
+    getData(ret) {
+      // const { data: ret } = await this.$http.get("seller");
       this.allData = ret;
       this.sortDate();
       this.updateChart();

@@ -12,6 +12,8 @@
 <script>
 import { initOption } from "@/components/hot/hotOption";
 import { commonData } from "@/common/mixin";
+import { mapState } from "vuex";
+import { getThemeValue } from "@/utils/theme_utils.js";
 export default {
   name: "SellerPage",
   data() {
@@ -22,6 +24,7 @@ export default {
   },
   mixins: [commonData],
   computed: {
+    ...mapState(["theme"]),
     catName() {
       if (!this.allData) {
         return "";
@@ -32,30 +35,56 @@ export default {
     somStyle() {
       return {
         fontSize: this.titleFontSize + "px",
+        color: getThemeValue(this.theme).titleColor,
       };
     },
   },
+  created() {
+    // 注册回调函数
+    this.$socket.registerCallBack("hotData", this.getData);
+  },
   mounted() {
     this.initChart();
-    this.getData();
+    // this.getData();
+    // 发送数据给服务器
+    this.$socket.send({
+      action: "getData",
+      socketType: "hotData",
+      chartName: "hotproduct",
+      value: "",
+    });
     // 监听屏幕变化
     window.addEventListener("resize", this.screenAdapter);
     this.screenAdapter();
   },
+
   destroyed() {
     clearInterval(this.timer);
     // 注销事件
     window.removeEventListener("resize", this.screenAdapter);
+    // 销毁回调函数
+    this.$socket.unRegisterCallBack("hotData");
   },
+
+  watch: {
+    theme() {
+      // 销毁图表
+      this.chartInstance.dispose();
+      this.initChart();
+      this.screenAdapter();
+      this.updateChart();
+    },
+  },
+
   methods: {
     // 初始化
     initChart() {
-      this.chartInstance = this.$echarts.init(this.$refs.hot, "chalk");
+      this.chartInstance = this.$echarts.init(this.$refs.hot, this.theme);
       this.chartInstance.setOption(initOption);
     },
     // 获取数据
-    async getData() {
-      const { data: ret } = await this.$http.get("hotproduct");
+    getData(ret) {
+      // const { data: ret } = await this.$http.get("hotproduct");
       this.allData = ret;
       this.updateChart();
       // this.startInterval();
@@ -100,16 +129,16 @@ export default {
           },
         },
         legend: {
-          itemWidth: this.titleFontSize / 2,
-          itemHeight: this.titleFontSize / 2,
-          itemGap: this.titleFontSize / 2,
+          itemWidth: this.titleFontSize,
+          itemHeight: this.titleFontSize,
+          itemGap: this.titleFontSize,
           textStyle: {
-            fontSize: this.titleFontSize / 2,
+            fontSize: this.titleFontSize * 0.8,
           },
         },
         series: [
           {
-            radius: this.titleFontSize * 5,
+            radius: this.titleFontSize * 4,
             center: ["50%", "60%"],
           },
         ],
@@ -139,9 +168,12 @@ export default {
 </script>
 
 <style lang='less' scoped>
+.hot {
+  position: relative;
+}
 .left,
 .right {
-  position: fixed;
+  position: absolute;
   top: 50%;
   color: #fff;
   z-index: 10;
@@ -160,7 +192,7 @@ export default {
   right: 10%;
 }
 .title {
-  position: fixed;
+  position: absolute;
   bottom: 10%;
   right: 5%;
   color: #fff;

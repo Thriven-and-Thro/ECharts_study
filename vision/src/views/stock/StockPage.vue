@@ -16,6 +16,7 @@ import {
   colorArr,
 } from "@/components/stock/stockOption";
 import { commonData } from "@/common/mixin";
+import { mapState } from "vuex";
 export default {
   name: "StockPage",
   mixins: [commonData],
@@ -24,27 +25,53 @@ export default {
       currentIndex: 0,
     };
   },
+  created() {
+    // 注册回调函数
+    this.$socket.registerCallBack("stockData", this.getData);
+  },
   mounted() {
     this.initChart();
-    this.getData();
+    // this.getData();
+    // 发送数据给服务器
+    this.$socket.send({
+      action: "getData",
+      socketType: "stockData",
+      chartName: "stock",
+      value: "",
+    });
     // 监听屏幕变化
     window.addEventListener("resize", this.screenAdapter);
     this.screenAdapter();
   },
+
   destroyed() {
     clearInterval(this.timer);
     // 注销事件
     window.removeEventListener("resize", this.screenAdapter);
+    // 销毁回调函数
+    this.$socket.unRegisterCallBack("stockData");
+  },
+  computed: {
+    ...mapState(["theme"]),
+  },
+  watch: {
+    theme() {
+      // 销毁图表
+      this.chartInstance.dispose();
+      this.initChart();
+      this.screenAdapter();
+      this.updateChart();
+    },
   },
   methods: {
     // 初始化
     initChart() {
-      this.chartInstance = this.$echarts.init(this.$refs.stock, "chalk");
+      this.chartInstance = this.$echarts.init(this.$refs.stock, this.theme);
       this.chartInstance.setOption(initOption);
     },
     // 获取数据
-    async getData() {
-      const { data: ret } = await this.$http.get("stock");
+    getData(ret) {
+      // const { data: ret } = await this.$http.get("stock");
       this.allData = ret;
       this.updateChart();
       this.startInterval();
@@ -68,7 +95,7 @@ export default {
           },
           data: [
             {
-              name: item.name + "\n" + item.sales,
+              name: item.name + "\n\n" + item.sales,
               value: item.sales,
               itemStyle: {
                 color: new this.$echarts.graphic.LinearGradient(0, 1, 0, 0, [
@@ -116,8 +143,8 @@ export default {
     // 屏幕适配
     screenAdapter() {
       const titleFontSize = (this.$refs.stock.offsetWidth / 100) * 3.6;
-      const innerRadius = titleFontSize * 2.75;
-      const outterRadius = titleFontSize * 1.75;
+      const innerRadius = titleFontSize * 3;
+      const outterRadius = titleFontSize * 2.8;
       // 通过for循环和push方法将对象写入数组中进行赋值
       let seriesRadius = [];
       for (let i = 0; i < 5; i++) {
@@ -125,7 +152,7 @@ export default {
           type: "pie",
           radius: [outterRadius, innerRadius],
           label: {
-            fontSize: titleFontSize / 2,
+            fontSize: titleFontSize * 0.7,
           },
         });
       }
