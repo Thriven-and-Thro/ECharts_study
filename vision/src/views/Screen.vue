@@ -11,7 +11,7 @@
         <span
           class="expand"
           @click="clickExpand('trend')"
-          :style="clickColor"
+          :class="clickColor"
         ></span>
       </div>
       <div
@@ -22,7 +22,7 @@
         <span
           class="expand"
           @click="clickExpand('seller')"
-          :style="clickColor"
+          :class="clickColor"
         ></span>
       </div>
       <div
@@ -33,7 +33,7 @@
         <span
           class="expand"
           @click="clickExpand('map')"
-          :style="clickColor"
+          :class="clickColor"
         ></span>
       </div>
       <div
@@ -44,7 +44,7 @@
         <span
           class="expand"
           @click="clickExpand('rank')"
-          :style="clickColor"
+          :class="clickColor"
         ></span>
       </div>
       <div
@@ -55,7 +55,7 @@
         <span
           class="expand"
           @click="clickExpand('hot')"
-          :style="clickColor"
+          :class="clickColor"
         ></span>
       </div>
       <div
@@ -66,7 +66,7 @@
         <span
           class="expand"
           @click="clickExpand('stock')"
-          :style="clickColor"
+          :class="clickColor"
         ></span>
       </div>
     </div>
@@ -131,15 +131,11 @@ export default {
     },
     clickColor() {
       // 判断是否全屏
-      return this.target === false
-        ? {
-            backgroundImage:
-              "url(" + getThemeValue(this.theme).backgroundExpand + ")",
-          }
-        : {
-            backgroundImage:
-              "url(" + getThemeValue(this.theme).backgroundNarrow + ")",
-          };
+      if (this.target === false) {
+        return this.theme === "chalk" ? "" : "expand2";
+      } else {
+        return this.theme === "chalk" ? "narrow1" : "narrow2";
+      }
     },
   },
   methods: {
@@ -251,6 +247,7 @@ export default {
   width: 20px;
   top: 10px;
   right: 10px;
+  background-image: url("~@/assets/img/expand1.png");
   background-size: 20px 20px;
   z-index: 11;
 }
@@ -278,5 +275,14 @@ export default {
   height: 5vh;
   background: url("../assets/img/换肤.svg");
   background-size: 5vh 5vh;
+}
+.expand2 {
+  background-image: url("~@/assets/img/expand2.png");
+}
+.narrow1 {
+  background-image: url("~@/assets/img/narrow1.png");
+}
+.narrow2 {
+  background-image: url("~@/assets/img/narrow2.png");
 }
 </style>
